@@ -15,8 +15,10 @@ def sigmoid(x):
     Return:
     s -- sigmoid(x)
     """
-    s = 1 / (1 + np.exp(-x))
-    return s
+    try:
+        return 1 / (1 + np.exp(-x))
+    except RuntimeWarning:
+        print('')
 
 
 def relu(x):
@@ -63,11 +65,11 @@ def forward_propagation(X, parameters):
 
     # LINEAR -> RELU -> LINEAR -> RELU -> LINEAR -> SIGMOID
     z1 = np.dot(W1, X) + b1
-    a1 = relu(z1)
-    # a1 = sigmoid(z1)
+    # a1 = relu(z1)
+    a1 = sigmoid(z1)
     z2 = np.dot(W2, a1) + b2
-    a2 = relu(z2)
-    # a2 = sigmoid(z2)
+    # a2 = relu(z2)
+    a2 = sigmoid(z2)
     z3 = np.dot(W3, a2) + b3
     a3 = sigmoid(z3)
 
@@ -96,14 +98,14 @@ def backward_propagation(X, Y, cache):
     db3 = np.sum(dz3, axis=1, keepdims=True)
 
     da2 = np.dot(W3.T, dz3)
-    dz2 = np.multiply(da2, np.int64(a2 > 0))
-    # dz2 = np.multiply(da2, np.multiply(a2, (1 - a2)))
+    # dz2 = np.multiply(da2, np.int64(a2 > 0))
+    dz2 = np.multiply(da2, np.multiply(a2, (1 - a2)))
     dW2 = np.dot(dz2, a1.T)
     db2 = np.sum(dz2, axis=1, keepdims = True)
 
     da1 = np.dot(W2.T, dz2)
-    dz1 = np.multiply(da1, np.int64(a1 > 0))
-    # dz1 = np.multiply(da1, np.multiply(a1, (1 - a1)))
+    # dz1 = np.multiply(da1, np.int64(a1 > 0))
+    dz1 = np.multiply(da1, np.multiply(a1, (1 - a1)))
     dW1 = np.dot(dz1, X.T)
     db1 = np.sum(dz1, axis=1, keepdims = True)
 
@@ -131,15 +133,24 @@ def update_parameters(parameters, grads, learning_rate):
     L = len(parameters) // 2  # number of layers in the neural networks
 
     # Update rule for each parameter
-    for k in range(L):
-        parameters["W" + str(k + 1)] = parameters[
-                                           "W" + str(k + 1)] - learning_rate * \
-                                                               grads["dW" + str(
-                                                                   k + 1)]
-        parameters["b" + str(k + 1)] = parameters[
-                                           "b" + str(k + 1)] - learning_rate * \
-                                                               grads["db" + str(
-                                                                   k + 1)]
+    k = 0
+    while 1:
+        k += 1
+
+        if "W" + str(k) not in parameters:
+            break
+
+        learning_rate_W = parameters.get("W_LR" + str(k))
+        if learning_rate_W is None:
+            learning_rate_W = learning_rate
+        learning_rate_b = parameters.get("b_LR" + str(k))
+        if learning_rate_b is None:
+            learning_rate_b = learning_rate
+
+        parameters["W" + str(k)] =\
+            parameters["W" + str(k)] - learning_rate_W * grads["dW" + str(k)]
+        parameters["b" + str(k)] =\
+            parameters["b" + str(k)] - learning_rate_b * grads["db" + str(k)]
 
     return parameters
 
@@ -259,9 +270,9 @@ def predict_dec(parameters, X):
 
 
 def load_dataset():
-    np.random.seed(1)
+    # np.random.seed(1)
     train_X, train_Y = sklearn.datasets.make_circles(n_samples=300, noise=.05)
-    np.random.seed(2)
+    # np.random.seed(2)
     test_X, test_Y = sklearn.datasets.make_circles(n_samples=100, noise=.05)
     # Visualize the data
     plt.scatter(train_X[:, 0], train_X[:, 1], c=train_Y, s=40,

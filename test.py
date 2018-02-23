@@ -1,3 +1,4 @@
+from pprint import pprint
 import numpy as np
 import matplotlib.pyplot as plt
 import sklearn
@@ -33,11 +34,20 @@ def initialize_parameters_zeros(layers_dims):
 
     for l in range(1, L):
         ### START CODE HERE ### (≈ 2 lines of code)
-        R = np.random.rand(layers_dims[l], 1)
-        W = np.zeros((layers_dims[l], layers_dims[l - 1]))
-        parameters['W' + str(l)] = W + R
+        # if l == 1:
+        #     parameters['W' + str(l)] = np.full((
+        #         layers_dims[l], layers_dims[l - 1]), 0)
+        # else:
+        parameters['W' + str(l)] = np.full((
+            layers_dims[l], layers_dims[l - 1]), np.exp(np.random.randn()))
         parameters['b' + str(l)] = np.zeros((layers_dims[l], 1))
+
+        parameters['W_LR' + str(l)] = np.exp(np.random.randn(
+            layers_dims[l], layers_dims[l - 1]))
+        parameters['b_LR' + str(l)] = np.exp(np.random.randn(
+            layers_dims[l], 1))
         ### END CODE HERE ###
+    pprint(parameters)
     return parameters
 
 
@@ -55,16 +65,24 @@ def initialize_parameters_random(layers_dims):
                     bL -- bias vector of shape (layers_dims[L], 1)
     """
 
-    np.random.seed(
-        3)  # This seed makes sure your "random" numbers will be the as ours
+    # np.random.seed(
+    #     3)  # This seed makes sure your "random" numbers will be the as ours
     parameters = {}
     L = len(layers_dims)  # integer representing the number of layers
 
     for l in range(1, L):
         ### START CODE HERE ### (≈ 2 lines of code)
-        parameters['W' + str(l)] = np.abs(np.random.randn(
-            layers_dims[l], layers_dims[l - 1]))
+        if l == (L - 1):
+            parameters['W' + str(l)] = np.zeros((
+                layers_dims[l], layers_dims[l - 1]))
+        else:
+            parameters['W' + str(l)] = np.random.rand(
+                layers_dims[l], layers_dims[l - 1])
         parameters['b' + str(l)] = np.zeros((layers_dims[l], 1))
+
+        parameters['W_LR' + str(l)] = np.random.rand(
+            layers_dims[l], layers_dims[l - 1])
+        parameters['b_LR' + str(l)] = np.random.rand(layers_dims[l], 1)
         ### END CODE HERE ###
 
     return parameters
@@ -102,6 +120,8 @@ def model(X, Y, learning_rate=0.01, num_iterations=15000, print_cost=True,
     else:
         raise Exception('No Initialization Method Specified')
 
+    # print(parameters)
+
     # Loop (gradient descent)
 
     for i in range(0, num_iterations):
@@ -134,7 +154,10 @@ def model(X, Y, learning_rate=0.01, num_iterations=15000, print_cost=True,
 
 
 if __name__ == '__main__':
-    parameters = model(train_X, train_Y, initialization="random", num_iterations=15000)
+    parameters = model(train_X, train_Y, initialization="zeros", num_iterations=15000)
+    # import pprint
+    # pprint.pprint(parameters)
+
     print ("On the train set:")
     predictions_train = predict(train_X, train_Y, parameters)
     print ("On the test set:")
