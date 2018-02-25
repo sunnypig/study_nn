@@ -98,6 +98,7 @@ def backward_propagation(X, Y, cache):
     db3 = np.sum(dz3, axis=1, keepdims=True)
 
     da2 = np.dot(W3.T, dz3)
+
     # dz2 = np.multiply(da2, np.int64(a2 > 0))
     dz2 = np.multiply(da2, np.multiply(a2, (1 - a2)))
     dW2 = np.dot(dz2, a1.T)

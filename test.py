@@ -153,18 +153,37 @@ def model(X, Y, learning_rate=0.01, num_iterations=15000, print_cost=True,
     return parameters
 
 
+# from nns.connection import Connection
+from nns.activation import (
+    Sigmoid, Relu
+)
+from nns.loss import CrossEntropy
+from nns.layer import Layer
+from nns.model import Model
+
+
 if __name__ == '__main__':
-    parameters = model(train_X, train_Y, initialization="zeros", num_iterations=15000)
+
+    model = Model(loss=CrossEntropy(), learning_rate=0.1)
+    model.append(Layer(train_X.shape[0], Relu()))
+    model.append(Layer(10, Sigmoid()))
+    model.append(Layer(5, Sigmoid()))
+    model.append(Layer(1, Sigmoid()))
+    model.compile()
+
+    model.train(train_X, train_Y, number_iterations=15000)
+
+    # parameters = model(train_X, train_Y, initialization="zeros", num_iterations=15000)
     # import pprint
     # pprint.pprint(parameters)
 
-    print ("On the train set:")
-    predictions_train = predict(train_X, train_Y, parameters)
-    print ("On the test set:")
-    predictions_test = predict(test_X, test_Y, parameters)
+    # print ("On the train set:")
+    # predictions_train = predict(train_X, train_Y, parameters)
+    # print ("On the test set:")
+    # predictions_test = predict(test_X, test_Y, parameters)
 
     plt.title("Model with large random initialization")
     axes = plt.gca()
     axes.set_xlim([-1.5, 1.5])
     axes.set_ylim([-1.5, 1.5])
-    plot_decision_boundary(lambda x: predict_dec(parameters, x.T), train_X, train_Y)
+    plot_decision_boundary(lambda x: model.predict(x.T) > 0.5, train_X, train_Y)
